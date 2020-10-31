@@ -8,80 +8,117 @@ Please install the following:
 
 """
 
-
-# import pygame
-import time
+import os
 import sys
-# import soundfile as sf
+import json
 from pydub import AudioSegment
 from pydub.playback import play
+# import soundfile as sf
+# import pygame
+
+one_unit = 0.5
+three_units = 3 * one_unit
+seven_units = 7 * one_unit
+time_per_unit = 1000 #in milli seconds
+path_get = './morse_character_audio_files/'
+path_store = './morse_text_audio_files/'
 
 
-CODE = {'A': '.-', 'B': '-...', 'C': '-.-.',
-        'D': '-..', 'E': '.', 'F': '..-.',
-        'G': '--.', 'H': '....', 'I': '..',
-        'J': '.---', 'K': '-.-', 'L': '.-..',
-        'M': '--', 'N': '-.', 'O': '---',
-        'P': '.--.', 'Q': '--.-', 'R': '.-.',
-        'S': '...', 'T': '-', 'U': '..-',
-        'V': '...-', 'W': '.--', 'X': '-..-',
-        'Y': '-.--', 'Z': '--..',
-
-        '0': '-----', '1': '.----', '2': '..---',
-        '3': '...--', '4': '....-', '5': '.....',
-        '6': '-....', '7': '--...', '8': '---..',
-        '9': '----.'
-        }
-
-ONE_UNIT = 0.5
-THREE_UNITS = 3 * ONE_UNIT
-SEVEN_UNITS = 7 * ONE_UNIT
-PATH = './morse_sound_files/'
+def get_json_files():
+    with open('./morse_code.json', "r", encoding='utf-8') as file:
+        morse_code = json.load(file)
+    with open('./special_character.json', 'r', encoding='utf-8') as file:
+        special_characters = json.load(file)
+    return morse_code, special_characters
 
 
-def verify(string):
-    keys = CODE.keys()
+def get_text_data(morse_code, special_characters):
+    texts = []
+    with open('./text_data.txt', 'r', encoding='utf-8') as text_file:
+        lines = text_file.readlines()
+        keys = list(morse_code.keys())
+        keys += list(special_characters.keys())
+        for line in lines:
+            line = line.strip('\n')
+            verify(line, keys)
+            texts.append(line)
+    return texts
+
+
+def get_audio_mediums():
+    audio_mediums = []
+    for _, _, files in os.walk("./processed audios"):
+        audio_mediums = [file.split('.')[0] for file in files]
+    audio_mediums += ['beeps']
+    return audio_mediums
+
+
+def verify(string, keys):
+    keys += ['/','"']
     for char in string:
         if char.upper() not in keys and char != ' ':
+            print(char)
             sys.exit('Error the charcter ' + char + ' cannot be translated to Morse Code')
 
 
 def main():
-    print('Welcome to Alphabet to Morse Code Translator v.01\n')
-    msg = input('Enter Message: ')
-    verify(msg)
-    # pygame.mixer.init()
-    final_audio_output = AudioSegment.silent(duration = 0)
-    for char in msg:
-        if char == ' ':
-            final_audio_output += AudioSegment.silent(duration=(1000*SEVEN_UNITS))
-            time.sleep(SEVEN_UNITS)
-        else:
-            # CODE TO CONVERT .ogg FILES TO .wav
-            # data, samplerate =  sf.read(PATH +'Morse-'+char.upper()+".ogg")
-            # sf.write(PATH+'Morse-'+char.upper()+".wav", data, samplerate)
-
-            # PLAY OGG FILES USING PYGAME
-            # pygame.mixer.music.load(PATH +'Morse-'+char.upper()+".ogg")
-            # pygame.mixer.music.play()
-
-            # PLAY WAV FILES USING PYGAME
-            # pygame.mixer.music.load(PATH + 'Morse-' + char.upper() + ".wav")
-            # pygame.mixer.music.play()
-
-            # READ WAV FILE TO AN AUDIO SEGMENT
-            character_sound = AudioSegment.from_wav(PATH + 'Morse-' + char.upper() + ".wav")
-            three_units_sleep = AudioSegment.silent(duration=(1000*THREE_UNITS))  # duration in milliseconds
-
-            # ADD THE ABOVE TWO AUDIO SEGMENTS
-            final_audio_output += character_sound + three_units_sleep
-            time.sleep(THREE_UNITS)
-
-    #SAVE THE AUDIO FILE
-    final_audio_output.export(msg+".wav", format = "wav")
-    play(final_audio_output)
-    # play(AudioSegment.from_wav(msg+".wav"))
+    morse_code, special_characters = get_json_files()
+    #get text data
+    texts = get_text_data(morse_code, special_characters)
+    print(texts)
+    # audio mediums
+    audio_mediums = get_audio_mediums()
+    print(audio_mediums)
+    three_units_sleep = AudioSegment.silent(duration=(time_per_unit * three_units))  # duration in milliseconds
+    seven_units_sleep = AudioSegment.silent(duration=(time_per_unit * seven_units))
+    for medium in audio_mediums:
+        print("Generating audio file for medium: ",medium )
+        path = path_get + medium + '/'
+        for text in texts:
+            print("text: ", text)
+            text_audio = AudioSegment.silent(duration = 0)
+            for character in text:
+                if character == " ":
+                    text_audio = seven_units_sleep
+                else:
+                    if special_characters.get(character):
+                        character_audio = AudioSegment.from_wav(path + special_characters[character] + ".wav")
+                    elif character =='/':
+                        character_audio = AudioSegment.from_wav( path + "slash.wav")
+                    elif character =='"':
+                        character_audio = AudioSegment.from_wav( path + "quotation.wav")
+                    else:
+                        character_audio = AudioSegment.from_wav( path + character.upper() + ".wav")
+                    text_audio += character_audio + three_units_sleep
+            # save and play text audio file
+            text_audio.export(path_store + medium + '/' + text + ".wav", format="wav")
+            play(text_audio)
 
 
 if __name__ == "__main__":
     main()
+
+
+
+ # CODE TO CONVERT .ogg FILES TO .wav
+# if special_characters.get(character):
+#     character = special_characters[character]
+#     data, samplerate = sf.read(PATH + 'beeps_ogg/Morse_Code_-_' + character + ".ogg")
+#     sf.write(PATH + 'beeps/' + character + ".wav", data, samplerate)
+# elif character == '/':
+#     data, samplerate = sf.read(PATH + 'beeps_ogg/Morse_Code_-_slash' + ".ogg")
+#     sf.write(PATH + "beeps/slash.wav", data, samplerate)
+# elif character == '"':
+#     data, samplerate = sf.read(PATH + 'beeps_ogg/Morse_Code_-_quotation' + ".ogg")
+#     sf.write(PATH + "beeps/quotation.wav", data, samplerate)
+# else:
+#     data, samplerate =  sf.read(PATH + 'beeps_ogg/Morse-'+ character+".ogg")
+#     sf.write(PATH + 'beeps/' + character+ ".wav", data, samplerate)
+
+# PLAY OGG FILES USING PYGAME
+# pygame.mixer.music.load(PATH +'Morse-'+char.upper()+".ogg")
+# pygame.mixer.music.play()
+
+# PLAY WAV FILES USING PYGAME
+# pygame.mixer.music.load(PATH + 'Morse-' + char.upper() + ".wav")
+# pygame.mixer.music.play()

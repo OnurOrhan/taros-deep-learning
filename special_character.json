@@ -1,0 +1,18 @@
+{
+  ",": "comma",
+  ".": "period",
+  "?": "question_mark",
+  ";": "semi_colon",
+  ":": "colon",
+  "-": "hyphen",
+  "'": "apostrope",
+  "_": "underscore",
+  "(": "paranthesis_open",
+  ")": "paranthesis_close",
+  "=": "equals",
+  "+": "plus",
+  "@": "at",
+  "$": "dollar_sign",
+  "!": "exclamation",
+  "&": "ampersand"
+}

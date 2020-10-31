@@ -7,13 +7,12 @@ one_unit = 0.5
 time_per_unit = 1000
 sleep_time_symbols = time_per_unit * one_unit #sleep time between symbols(dots and dashes) in a character
 
-path_store = "./morse_sound_files/" #path to store generated audio files
+path_store = "morse_character_audio_files/"  #path to store generated audio files
 path_get = "./dots_and_dashes/" #path to get dot and dash audio files
 
 def main():
     with open('./morse_code.json', "r", encoding='utf-8') as file:
         morse_code = json.load(file)
-
     #read audio files
     audio_mediums = []
     for _,_,files in os.walk("./processed audios"):
