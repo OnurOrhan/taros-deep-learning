@@ -4,7 +4,7 @@ from pydub import AudioSegment
 from pydub.playback import play
 
 one_unit = 0.5
-time_per_unit = 1000
+time_per_unit = 100
 sleep_time_symbols = time_per_unit * one_unit #sleep time between symbols(dots and dashes) in a character
 
 path_store = "morse_character_audio_files/"  #path to store generated audio files
@@ -35,7 +35,7 @@ def main():
                     character_audio += dash + one_unit_sleep
             #save character audio file
             character_audio.export(path_store + medium + "/" + character + ".wav", format="wav")
-            play(character_audio)
+            #play(character_audio)
 
 
 if __name__ == "__main__":
