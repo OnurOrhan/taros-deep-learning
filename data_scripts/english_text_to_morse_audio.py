@@ -20,8 +20,8 @@ one_unit = 0.5
 three_units = 3 * one_unit
 seven_units = 7 * one_unit
 time_per_unit = 100 #in milli seconds
-path_get = './morse_character_audio_files/'
-path_store = './morse_text_audio_files/'
+path_get = './data/morse_character_audio_files/'
+path_store = './data/morse_text_audio_files/'
 label_dict = {}
 
 def get_json_files():
@@ -36,7 +36,7 @@ def get_text_data(morse_code, special_characters):
     texts = []
     keys = list(morse_code.keys())
     keys += list(special_characters.keys())
-    with open('./text_data.txt', 'r', encoding='utf-8') as text_file:
+    with open('./data/text_data.txt', 'r', encoding='utf-8') as text_file:
         lines = text_file.readlines()
         for line in lines:
             line = line.strip('\n')
