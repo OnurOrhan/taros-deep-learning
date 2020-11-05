@@ -20,8 +20,8 @@ one_unit = 0.5
 three_units = 3 * one_unit
 seven_units = 7 * one_unit
 time_per_unit = 100 #in milli seconds
-path_get = './data/morse_character_audio_files/'
-path_store = './data/morse_text_audio_files/'
+path_get = './../data/morse_character_audio_files/'
+path_store = './../data/morse_text_audio_files_val/'
 label_dict = {}
 
 def get_json_files():
@@ -36,7 +36,7 @@ def get_text_data(morse_code, special_characters):
     texts = []
     keys = list(morse_code.keys())
     keys += list(special_characters.keys())
-    with open('./data/text_data.txt', 'r', encoding='utf-8') as text_file:
+    with open('./../data/validation.txt', 'r', encoding='utf-8') as text_file:
         lines = text_file.readlines()
         for line in lines:
             line = line.strip('\n')
@@ -47,9 +47,9 @@ def get_text_data(morse_code, special_characters):
 
 def get_audio_mediums():
     audio_mediums = []
-    for _, _, files in os.walk("./processed audios"):
+    for _, _, files in os.walk("./../data/processed audios"):
         audio_mediums = [file.split('.')[0] for file in files]
-    audio_mediums += ['beeps']
+    audio_mediums.append('beep')
     return audio_mediums
 
 
@@ -64,7 +64,7 @@ def preload_audio(audio_mediums):
             for name in files:
                 file_path = os.path.join(root, name)
 
-                audio_files[medium][name.split('.')[0]] = AudioSegment.from_wav(file_path)
+                audio_files[medium][name.split('.')[0]] = AudioSegment.from_ogg(file_path)
 
     return audio_files
 
@@ -74,33 +74,33 @@ def verify(string, keys):
     for char in string:
         if char.upper() not in keys and char != ' ':
             print(char)
-            sys.exit('Error the charcter ' + char + ' cannot be translated to Morse Code')
+            sys.exit('Error the character ' + char + ' cannot be translated to Morse Code')
 
 
 def main():
     morse_code, special_characters = get_json_files()
     #get text data
     texts = get_text_data(morse_code, special_characters)
-    print(texts)
+    # print(texts)
 
     # audio mediums
     audio_mediums = get_audio_mediums()
-    print(audio_mediums)
+    # print(audio_mediums)
     three_units_sleep = AudioSegment.silent(duration=(time_per_unit * three_units))  # duration in milliseconds
     seven_units_sleep = AudioSegment.silent(duration=(time_per_unit * seven_units))
 
 
     #preloading the audio
     audio_files = preload_audio(audio_mediums)
-    print(audio_files)
+    # print(audio_files)
 
     for medium in audio_mediums:
-        print("Generating audio file for medium: ",medium )
+        # print("Generating audio file for medium: ",medium )
         path = path_get + medium + '/'
         for i,text in enumerate(texts):
             file_name = str(i)+'_'+medium
             label_dict[file_name] = {}
-            print("text: ", text)
+            # print("text: ", text)
             text_audio = AudioSegment.silent(duration = 0)
             for character in text:
                 if character.isalpha():
@@ -119,12 +119,12 @@ def main():
 
                     text_audio += character_audio + three_units_sleep
             # save and play text audio file
-            text_audio.export(path_store + medium + '/' + file_name+ ".wav", format="wav")
+            text_audio.export(path_store + medium + '/' + file_name+ ".ogg", format="ogg")
 
             label_dict[file_name] = text
             #play(text_audio)
 
-    with open('./labels.json', 'w') as fp:
+    with open('./../data/labels_val.json', 'w') as fp:
         json.dump(label_dict, fp)
 
 
