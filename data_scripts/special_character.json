@@ -14,5 +14,7 @@
   "@": "at",
   "$": "dollar_sign",
   "!": "exclamation",
-  "&": "ampersand"
+  "&": "ampersand",
+  "/": "slash",
+  "\"": "quotation"
 }
